@@ -5,21 +5,23 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/mattn/go-haiku"
 )
 
-type slackResponse struct {
-	Text string `json:"text"`
-}
-
 func handler(w http.ResponseWriter, req *http.Request) {
-	if req.FormValue("token") != TOKEN {
+	if req.FormValue("token") != os.Getenv("PAYLOAD_TOKEN") {
 		log.Println("error: invalid token")
 		return
 	}
+	user := req.FormValue("user_name")
+	if user == "haiku-bot" {
+		return
+	}
+
 	text := req.FormValue("text")
 	log.Printf("new message \"%s\" in #%s\n", text, req.FormValue("channel_name"))
 	haikus := haiku.Find(text, []int{5, 7, 5})
